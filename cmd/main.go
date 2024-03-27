@@ -6,20 +6,27 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"text/template"
 )
 
 type Payload struct {
-	Count int
+	UserName string `json:"user_name"`
+	Message  string `json:"message"`
 }
 
+type ResponsePayload struct {
+	Success bool `json:"success"`
+}
+
+var History = make([]Payload, 0, 0)
+
 func main() {
-	http.HandleFunc("/", root)
+	http.HandleFunc("/getlist", getlist)
 	http.HandleFunc("/assets/script.js", jFile)
 	http.HandleFunc("/index", index)
+	http.HandleFunc("/sendmessage", sendmessage)
 	log.Println("Запущен сервер: http://127.0.0.1:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -43,12 +50,29 @@ func index(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, tpl.String())
 }
 
-func jFile(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "/Users/nikita/chat/assets/script.js")
+func sendmessage(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var p Payload
+	err := decoder.Decode(&p)
+	if err != nil {
+		panic(err)
+	}
+	History = append(History, p)
+	log.Println(p.UserName)
+	log.Println(p.Message)
+
+	data := ResponsePayload{Success: true}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(data)
 }
 
-func root(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(fmt.Sprintf("Color is %s", r.URL.Query().Get("color")))
+func getlist(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Payload{Count: rand.Intn(5)})
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(History)
+}
+
+func jFile(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "/Users/nikita/chat/assets/script.js")
 }
