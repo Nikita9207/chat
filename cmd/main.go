@@ -23,8 +23,27 @@ type ResponsePayload struct {
 var History = make([]Payload, 0, 0)
 
 func main() {
+	if _, err := os.Stat("History.txt"); err == nil {
+		file, err := os.Open("History.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&History)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("История загружена!")
+	} else if os.IsNotExist(err) {
+		fmt.Println("Файл History.txt еще не создан!")
+	} else {
+		log.Fatal(err)
+	}
+
 	http.HandleFunc("/getlist", getlist)
-	http.HandleFunc("/assets/script.js", jFile)
+	http.HandleFunc("/scripts/script.js", jFile)
 	http.HandleFunc("/index", index)
 	http.HandleFunc("/sendmessage", sendmessage)
 	log.Println("Запущен сервер: http://127.0.0.1:8080")
@@ -32,7 +51,7 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("/Users/nikita/chat/assets/index.html")
+	t, err := template.ParseFiles("/Users/nikita/chat/web/index.html")
 	if err != nil {
 		dir, err1 := os.Getwd()
 		if err1 != nil {
@@ -61,6 +80,17 @@ func sendmessage(w http.ResponseWriter, r *http.Request) {
 	log.Println(p.UserName)
 	log.Println(p.Message)
 
+	file, err := os.OpenFile("History.txt", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(History)
+	if err != nil {
+		log.Fatal()
+	}
+
 	data := ResponsePayload{Success: true}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -74,5 +104,6 @@ func getlist(w http.ResponseWriter, r *http.Request) {
 }
 
 func jFile(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "/Users/nikita/chat/assets/script.js")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	http.ServeFile(w, r, "/Users/nikita/chat/scripts/script.js")
 }
