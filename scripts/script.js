@@ -1,3 +1,17 @@
+let username = getCookie("username");
+if (username !== "") {
+    document.getElementById("username").value = username;
+}
+function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+    }
+    return null;
+}
 
 let sendButton = document.getElementById("send");
 sendButton.onclick = function () {
@@ -5,7 +19,7 @@ sendButton.onclick = function () {
     let message = messageInput.value;
     let userNameInput = document.getElementById("username")
     let userName = userNameInput.value;
-    let datatime =  new Date().toLocaleString();
+    let time =  new Date().toLocaleString();
 
     if (message.trim() !== "") {
         (async () => {
@@ -15,7 +29,7 @@ sendButton.onclick = function () {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ time:datatime, user_name: userName, message: message })
+                body: JSON.stringify({ time:time, user_name: userName, message: message })
             });
             const content = await rawResponse.json();
             console.log(content);
@@ -34,7 +48,7 @@ function updateHistory() {
             document.getElementById("messages").innerHTML = "";
             data.forEach(data => {
                 let newMessage = document.createElement("div");
-                newMessage.textContent = data.datatime + " - " + data.user_name + " : " + data.message;
+                newMessage.textContent = data.time + " - " + data.user_name + " : " + data.message;
                 document.getElementById("messages").appendChild(newMessage);
                 //console.log("id: ", data.id, "year: ", data.year, "title: ", data.title);
             })});
