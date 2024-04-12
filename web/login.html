@@ -10,14 +10,18 @@
 <div class="row vh-100 align-items-center justify-content-center">
     <div class="row">
         <div class="col-12 text-center">
-
-            <form action="">
+            <form action="/auth" method="post" enctype="application/x-www-form-urlencoded">
+                <div class="mb-3">Введите логин и пароль</div>
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="username" placeholder="Введите имя"
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Login"
                            style="width: 150px; display: inline">
                 </div>
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary" id="send" onclick="return sendButton()">Авторизация</button>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                           style="width: 150px; display: inline">
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary" id="send" >Авторизация</button>
                 </div>
             </form>
         </div>

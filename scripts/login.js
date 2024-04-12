@@ -7,7 +7,7 @@ function sendButton() {
     let username = document.getElementById("username");
     let name = username.value;
     setCookie("username", name, 365);
-    window.location.replace("http://127.0.0.1:8080/index");
+    window.location.replace("http://127.0.0.1:8080/auth");
     return false;
 }
 function setCookie(name,value,days) {

@@ -7,8 +7,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"text/template"
+	"time"
 )
 
 type Payload struct {
@@ -47,12 +49,12 @@ func main() {
 	http.Handle("/scripts/", http.StripPrefix("/scripts", fileServer))
 
 	http.HandleFunc("/", login)
+	http.HandleFunc("/auth", auth)
 	http.HandleFunc("/getlist", getlist)
-	//http.HandleFunc("/scripts/script.js", jFile)
 	http.HandleFunc("/index", index)
 	http.HandleFunc("/sendmessage", sendmessage)
-	log.Println("Запущен сервер: http://127.0.0.1:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Запущен сервер: http://127.0.0.1:80")
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +83,23 @@ func login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func auth(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	username := r.Form.Get("username")
+	password := r.Form.Get("password")
+
+	expiration := time.Now()
+	expiration = expiration.AddDate(1, 0, 0)
+	cookie := http.Cookie{Name: "username", Value: url.QueryEscape(username), Expires: expiration, Path: "/"}
+	http.SetCookie(w, &cookie)
+	fmt.Fprintf(w, "Received username: %s, password: %s", username, password)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -151,9 +170,3 @@ func getlist(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 }
-
-/*func jFile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	http.ServeFile(w, r, "/Users/nikita/chat/scripts/login.js")
-	http.ServeFile(w, r, "/Users/nikita/chat/scripts/script.js")
-}*/
