@@ -17,16 +17,31 @@
                            style="width: 150px; display: inline">
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                            style="width: 150px; display: inline">
+                    <a class="password-toggle" onclick="togglePasswordVisibility('password')">Show</a>
                 </div>
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary" id="send" >Авторизация</button>
+                    <button type="submit" class="btn btn-primary" id="send" onclick="sendButton()">Авторизация</button>
+                </div>
+                <div class="mb-3">
+                    <a href="http://127.0.0.1:80/registration" type="submit" class="btn btn-primary" id="registration" >Регистрация</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <script src="/scripts/login.js"></script>
+<script>
+    function togglePasswordVisibility(inputId) {
+        let input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+        return false
+    }
+</script>
 </body>
 </html>
